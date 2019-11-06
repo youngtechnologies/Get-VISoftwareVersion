@@ -14,6 +14,6 @@ $esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*$SoftwareName
 }
 
 foreach ($vCenter in $vCenters){
-Connect-VIServer $vCenter
+$VIServer = Connect-VIServer $vCenter
 Invoke-Command $Command
 }
