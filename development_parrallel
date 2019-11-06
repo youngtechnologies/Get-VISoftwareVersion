@@ -1,0 +1,17 @@
+workflow Get-VISoftwareVersion
+{
+param(
+  [Parameter (Mandatory = $true)]
+  [string]$vCenter
+)
+Connect-VIServer $vCenter
+$vmhosts = Get-VMHost | Sort-Object $_.name
+foreach -Parallel ($vmhost in $vmhosts){
+$output = InlineScript {write-host $vmhost.name}
+inlinescript {
+$esxcli = Get-EsxCli –VMHost (Get-VMHost $vmhost) –V2
+$esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl Version
+}
+}
+}
+Get-VISoftwareVersion "vCenterAddress"
