@@ -1,0 +1,9 @@
+Connect-VIServer "rhrz01vcp01"
+$Command = {$vmhosts = Get-VMHost | Sort-Object $_.name
+foreach ($vmhost in $vmhosts){
+write-host $vmhost.name
+$esxcli = Get-EsxCli –VMHost (Get-VMHost $vmhost) –V2
+$esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl Name,Version
+}
+}
+Invoke-Command $Command
