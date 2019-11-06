@@ -1,4 +1,4 @@
-Connect-VIServer "rhrz01vcp01"
+Connect-VIServer "vCenterAddress"
 $Command = {$vmhosts = Get-VMHost | Sort-Object $_.name
 foreach ($vmhost in $vmhosts){
 write-host $vmhost.name
