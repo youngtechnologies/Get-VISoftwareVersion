@@ -1,3 +1,11 @@
+$SoftwareName = "tools"
+
+$vCenters = @(
+	'vCenter01'
+	'vCenter02'
+	'vCenter03'
+)
+
 workflow Get-VISoftwareVersion
 {
 param(
@@ -14,4 +22,7 @@ $esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl
 }
 }
 }
-Get-VISoftwareVersion "vCenterAddress"
+
+foreach ($vCenter in $vCenters){
+Get-VISoftwareVersion $vCenter
+}
