@@ -10,7 +10,7 @@ foreach -Parallel ($vmhost in $vmhosts){
 $output = InlineScript {write-host $vmhost.name}
 inlinescript {
 $esxcli = Get-EsxCli –VMHost (Get-VMHost $vmhost) –V2
-$esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl Version
+$esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl Name,Version
 }
 }
 }
