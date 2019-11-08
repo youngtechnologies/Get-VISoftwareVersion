@@ -1,12 +1,12 @@
-$SoftwareName = "tools"
+$SoftwareName = "tools"   #This parameter can be changed to any VIB Software inventory item, for example "NVIDIA"
 $vCenters = @(
-    'vCenter01',
-    'vCenter02',
-    'vCenter03',
-    'vCenter04',
-    'vCenter05',
-    'vCenter06',
-    'vCenter07',
+    'vCenter01'
+    'vCenter02'
+    'vCenter03'
+    'vCenter04'
+    'vCenter05'
+    'vCenter06'
+    'vCenter07'
     'vCenter08'
 )
 
@@ -39,13 +39,10 @@ While (Get-Job -State "Running") {
 
 $returnArray = Get-Job | Receive-Job #
 
-$GetVISoftwareVersionOutput=""
-foreach ($obj in $returnArray){
-  $GetVISoftwareVersionOutput += $obj.hostname + "`n  " + $obj.SoftwareName + "`n    " + $obj.SoftwareVersion + "`n`n"
-}
+$Host.UI.RawUI.ForegroundColor = "Green"
 
 Remove-Job *
 
 cls
 
-Write-Host $GetVISoftwareVersionOutput -foreground Green
+$returnArray | Select-Object hostname,SoftwareName,SoftwareVersion | Foreach {[PSCustomObject]$_} | Format-Table -AutoSize -Wrap
