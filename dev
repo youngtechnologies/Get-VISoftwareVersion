@@ -7,7 +7,7 @@ $vCenters = @(
     'vCenter05',
     'vCenter06',
     'vCenter07',
-    'vCenter08',
+    'vCenter08'
 )
 $throttlejobs = 20
  
