@@ -1,15 +1,15 @@
 $SoftwareName = "NVIDIA"
 $vCenters = @(
-    'dhrz01vcp01',
-    'dhrz02vcp01',
-    'dhrz03vcp01',
-    'dhrz04vcp01',
-    'dhrz05vcp01',
-    'dhrz06vcp01',
-    'dhrz07vcp01',
-    'dhrz08vcp01'
+    'vCenter01',
+    'vCenter02',
+    'vCenter03',
+    'vCenter04',
+    'vCenter05',
+    'vCenter06',
+    'vCenter07',
+    'vCenter08',
 )
- 
+$throttlejobs = 20
  
 $GetVISoftwareVersion = {
         param($vmhost, $name, $session, $SoftwareName)
@@ -31,6 +31,11 @@ $vmhosts = Get-VMHost | Sort-Object $_.name
 $returnList=@()
 foreach ($vmhost in $vmhosts){
     Start-Job -ScriptBlock $GetVISoftwareVersion -ArgumentList "$($vmhost.name)",$vcConnection.name,$vcconnection.sessionid,$SoftwareName
+    While ((Get-Job -State "Running").Count -ge $throttlejobs) {
+    	write-host -NoNewline "."
+    	start-sleep 1
+    }
+}
 }
 }
  
@@ -50,4 +55,3 @@ Remove-Job *
 cls
 
 Write-Host $GetVISoftwareVersionOutput -foreground Green
-
