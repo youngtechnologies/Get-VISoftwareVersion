@@ -1,28 +1,51 @@
 $SoftwareName = "tools"
-
 $vCenters = @(
-	'vCenter01'
-	'vCenter02'
-	'vCenter03'
+    'vCenter01',
+    'vCenter02',
+    'vCenter03',
+    'vCenter04',
+    'vCenter05',
+    'vCenter06',
+    'vCenter07',
+    'vCenter08'
 )
 
-workflow Get-VISoftwareVersion
-{
-param(
-  [Parameter (Mandatory = $true)]
-  [string]$vCenter
-)
-Connect-VIServer $vCenter
-$vmhosts = Get-VMHost | Sort-Object $_.name
-foreach -Parallel ($vmhost in $vmhosts){
-$output = InlineScript {write-host $vmhost.name}
-inlinescript {
-$esxcli = Get-EsxCli –VMHost (Get-VMHost $vmhost) –V2
-$esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*tools*"} | fl Name,Version
+$GetVISoftwareVersion = {
+        param($vCenter,$SoftwareName)
+	$vcConnection = connect-viserver $vCenter
+	$vmhosts = Get-VMHost | Sort-Object $_.name
+	$returnArray = @()
+	foreach ($vmhost in $vmhosts){
+	        $esxcli = Get-EsxCli –VMHost (Get-VMHost $vmhost) –V2
+	        $itemList = $esxcli.software.vib.list.invoke() | Where-Object {$_.Name -like "*$SoftwareName*"} | select Name,Version
+		$returnObject = New-Object -TypeName PSObject -Property @{
+            		hostname	= 	$vmhost.Name
+            		SoftwareName	=	$itemlist.Name
+			SoftwareVersion	=	$itemlist.Version
+		}
+		$returnArray += $returnObject
+	}
+	$returnArray
 }
-}
+ 
+foreach($vCenter in $vCenters){
+	Start-Job -ScriptBlock $GetVISoftwareVersion -ArgumentList $vCenter,$SoftwareName
 }
 
-foreach ($vCenter in $vCenters){
-Get-VISoftwareVersion $vCenter
+While (Get-Job -State "Running") {
+    write-host -NoNewline "."
+    start-sleep 1
 }
+
+$returnArray = Get-Job | Receive-Job #
+
+$GetVISoftwareVersionOutput=""
+foreach ($obj in $returnArray){
+  $GetVISoftwareVersionOutput += $obj.hostname + "`n  " + $obj.SoftwareName + "`n    " + $obj.SoftwareVersion + "`n`n"
+}
+
+Remove-Job *
+
+cls
+
+Write-Host $GetVISoftwareVersionOutput -foreground Green
